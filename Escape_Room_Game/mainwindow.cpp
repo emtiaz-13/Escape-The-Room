@@ -10,7 +10,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_solvedPuzzles(0), m_hasKey(false)
 {
-    setupInitialInterface();
     setupRoom();
     setupPuzzleInterface();
     generatePuzzles(16);
@@ -39,33 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-}
-
-void MainWindow::setupInitialInterface()
-{
-    setCentralWidget(new QWidget);
-    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget());
-
-    m_startButton = new QPushButton("Start Game", this); // change
-    m_exitButton = new QPushButton("Exit Game", this);   // change
-    connect(m_startButton, &QPushButton::clicked, this, &MainWindow::startGame);  // change
-    connect(m_exitButton, &QPushButton::clicked, this, &MainWindow::exitGame);    // change
-
-    QHBoxLayout *buttonLayout = new QHBoxLayout;  // change
-    buttonLayout->addWidget(m_startButton);       // change
-    buttonLayout->addWidget(m_exitButton);       // change
-
-    mainLayout->addLayout(buttonLayout);    // change
-
-    QPalette pal = palette();        // change
-    pal.setColor(QPalette::Window, Qt::black);   // change
-    pal.setColor(QPalette::ButtonText, Qt::white);    // change
-    pal.setColor(QPalette::Text, Qt::white);      // change
-    pal.setColor(QPalette::WindowText, Qt::white);    // change
-    setPalette(pal);     // change
-
-    m_startButton->setStyleSheet("background-color: #4CAF50; color: white; font-size: 18px; padding: 10px;");    // change
-    m_exitButton->setStyleSheet("background-color: #f44336; color: white; font-size: 18px; padding: 10px;");     // change
 }
 
 void MainWindow::setupRoom()
@@ -187,7 +159,7 @@ void MainWindow::onSubmitPuzzle()
     }
 }
 
-// update 1
+// change start
 void MainWindow::setupTimer()
 {
     m_remainingTime = 5 * 60; // 5 minutes in seconds
@@ -220,5 +192,5 @@ void MainWindow::gameOver()
     QMessageBox::warning(this, "Game Over", "Time's up! You couldn't escape the room in time.");
     QTimer::singleShot(0, this, &QWidget::close);
 }
-// end
+// change end
 
