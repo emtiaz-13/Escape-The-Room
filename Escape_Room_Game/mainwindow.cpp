@@ -1,11 +1,9 @@
-
 #include "mainwindow.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QRandomGenerator>
 #include <QTimer>
-#include <algorithm>
 #include <algorithm>
 #include <numeric>
 
@@ -15,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupRoom();
     setupPuzzleInterface();
     generatePuzzles(16);
+    setupTimer();
 
     setCentralWidget(new QWidget);
     QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget());
@@ -159,4 +158,39 @@ void MainWindow::onSubmitPuzzle()
         QMessageBox::warning(this, "Incorrect", "Sorry, that's not the correct answer. Try again!");
     }
 }
+
+// change start
+void MainWindow::setupTimer()
+{
+    m_remainingTime = 5 * 60; // 5 minutes in seconds
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, &MainWindow::updateTimer);
+
+    m_timeLabel = new QLabel(this);
+    m_timeLabel->setAlignment(Qt::AlignCenter);
+    m_timeLabel->setStyleSheet("font-size: 24px; color: white; background-color: black; padding: 10px;");
+    updateTimer(); // Initialize the label text
+}
+
+void MainWindow::updateTimer()
+{
+    if (m_remainingTime > 0) {
+        m_remainingTime--;
+        int minutes = m_remainingTime / 60;
+        int seconds = m_remainingTime % 60;
+        m_timeLabel->setText(QString("Time left: %1:%2")
+                                 .arg(minutes, 2, 10, QChar('0'))
+                                 .arg(seconds, 2, 10, QChar('0')));
+    } else {
+        gameOver();
+    }
+}
+
+void MainWindow::gameOver()
+{
+    m_timer->stop();
+    QMessageBox::warning(this, "Game Over", "Time's up! You couldn't escape the room in time.");
+    QTimer::singleShot(0, this, &QWidget::close);
+}
+// change end
 

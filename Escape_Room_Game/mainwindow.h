@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QLabel>
 #include <QLineEdit>
+#include <QTimer>
 
 struct Puzzle {
     QString question;
@@ -21,11 +22,14 @@ public:
     ~MainWindow();
 
 private slots:
+    void gameOver();
+    void updateTimer();
     void onBoxClicked();
     void onDoorClicked();
     void onSubmitPuzzle();
 
 private:
+    void setupTimer();
     void setupRoom();
     void setupPuzzleInterface();
     void showPuzzle();
@@ -43,6 +47,10 @@ private:
     QVector<Puzzle> m_currentPuzzles;
     int m_solvedPuzzles;
     bool m_hasKey;
+
+    QTimer  *m_timer;
+    QLabel *m_timeLabel;
+    int m_remainingTime;
 };
 
 #endif // MAINWINDOW_H
