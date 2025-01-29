@@ -40,33 +40,6 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::setupInitialInterface()
-{
-    setCentralWidget(new QWidget);
-    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget());
-
-    m_startButton = new QPushButton("Start Game", this); // change
-    m_exitButton = new QPushButton("Exit Game", this);   // change
-    connect(m_startButton, &QPushButton::clicked, this, &MainWindow::startGame);  // change
-    connect(m_exitButton, &QPushButton::clicked, this, &MainWindow::exitGame);    // change
-
-    QHBoxLayout *buttonLayout = new QHBoxLayout;  // change
-    buttonLayout->addWidget(m_startButton);       // change
-    buttonLayout->addWidget(m_exitButton);       // change
-
-    mainLayout->addLayout(buttonLayout);    // change
-
-    QPalette pal = palette();        // change
-    pal.setColor(QPalette::Window, Qt::black);   // change
-    pal.setColor(QPalette::ButtonText, Qt::white);    // change
-    pal.setColor(QPalette::Text, Qt::white);      // change
-    pal.setColor(QPalette::WindowText, Qt::white);    // change
-    setPalette(pal);     // change
-
-    m_startButton->setStyleSheet("background-color: #4CAF50; color: white; font-size: 18px; padding: 10px;");    // change
-    m_exitButton->setStyleSheet("background-color: #f44336; color: white; font-size: 18px; padding: 10px;");     // change
-}
-
 void MainWindow::setupRoom()
 {
     m_boxKey = new QPushButton("Box with Key", this);

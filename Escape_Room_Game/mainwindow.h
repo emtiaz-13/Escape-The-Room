@@ -22,8 +22,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void startGame();
-    void exitGame();
     void gameOver();
     void updateTimer();
     void onBoxClicked();
@@ -31,15 +29,12 @@ private slots:
     void onSubmitPuzzle();
 
 private:
-    void setupInitialInterface();
     void setupTimer();
     void setupRoom();
     void setupPuzzleInterface();
     void showPuzzle();
     void generatePuzzles(int numPuzzles = 16); // Update 1: Added parameter to generatePuzzles
 
-    QPushButton *m_startButton;    // new added
-    QPushButton *m_exitButton;
     QPushButton *m_boxKey;
     QPushButton *m_boxPuzzles;
     QPushButton *m_door;
