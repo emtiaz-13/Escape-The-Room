@@ -22,19 +22,24 @@ public:
     ~MainWindow();
 
 private slots:
-    void gameOver();
-    void updateTimer();
+    void startGame();
+    void exitGame();
     void onBoxClicked();
     void onDoorClicked();
     void onSubmitPuzzle();
+    void updateTimer();
+    void gameOver();
 
 private:
-    void setupTimer();
+    void setupInitialInterface();
     void setupRoom();
     void setupPuzzleInterface();
     void showPuzzle();
-    void generatePuzzles(int numPuzzles = 16); // Update 1: Added parameter to generatePuzzles
+    void generatePuzzles(int numPuzzles = 16);
+    void setupTimer();
 
+    QPushButton *m_startButton;
+    QPushButton *m_exitButton;
     QPushButton *m_boxKey;
     QPushButton *m_boxPuzzles;
     QPushButton *m_door;
@@ -43,15 +48,14 @@ private:
     QLineEdit *m_puzzleInput;
     QPushButton *m_submitPuzzle;
 
-    QVector<Puzzle> m_allPuzzles; // Update 2: No change needed, already declared correctly
+    QVector<Puzzle> m_allPuzzles;
     QVector<Puzzle> m_currentPuzzles;
     int m_solvedPuzzles;
     bool m_hasKey;
 
-    QTimer  *m_timer;
+    QTimer *m_timer;
     QLabel *m_timeLabel;
     int m_remainingTime;
 };
 
-#endif // MAINWINDOW_H
-
+#endif

@@ -3,52 +3,77 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QRandomGenerator>
-#include <QTimer>
+#include <QApplication>
 #include <algorithm>
 #include <numeric>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_solvedPuzzles(0), m_hasKey(false)
 {
+    setupInitialInterface();
     setupRoom();
     setupPuzzleInterface();
     generatePuzzles(16);
     setupTimer();
 
-    setCentralWidget(new QWidget);
-    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget());
-
-    QHBoxLayout *roomLayout = new QHBoxLayout;
-    roomLayout->addWidget(m_boxKey);
-    roomLayout->addWidget(m_boxPuzzles);
-    roomLayout->addWidget(m_door);
-
-    mainLayout->addLayout(roomLayout);
-    mainLayout->addWidget(m_puzzleLabel);
-    mainLayout->addWidget(m_puzzleInput);
-    mainLayout->addWidget(m_submitPuzzle);
-
-    m_puzzleLabel->hide();
-    m_puzzleInput->hide();
-    m_submitPuzzle->hide();
-
+    showFullScreen();
     setWindowTitle("Escape the Room");
-    setFixedSize(800, 400);
 }
 
 MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::setupInitialInterface()
+{
+    setCentralWidget(new QWidget);
+    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget());
+
+    m_startButton = new QPushButton("Start Game", this);
+    m_exitButton = new QPushButton("Exit Game", this);
+    connect(m_startButton, &QPushButton::clicked, this, &MainWindow::startGame);
+    connect(m_exitButton, &QPushButton::clicked, this, &MainWindow::exitGame);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(m_startButton);
+    buttonLayout->addWidget(m_exitButton);
+
+    mainLayout->addLayout(buttonLayout);
+
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, Qt::black);
+    pal.setColor(QPalette::ButtonText, Qt::white);
+    pal.setColor(QPalette::Text, Qt::white);
+    pal.setColor(QPalette::WindowText, Qt::white);
+    setPalette(pal);
+
+    m_startButton->setStyleSheet("background-color: #4CAF50; color: white; font-size: 18px; padding: 10px;");
+    m_exitButton->setStyleSheet("background-color: #f44336; color: white; font-size: 18px; padding: 10px;");
+}
+
 void MainWindow::setupRoom()
 {
     m_boxKey = new QPushButton("Box with Key", this);
     m_boxPuzzles = new QPushButton("Box with Riddles", this);
-    m_door = new QPushButton("Door", this);
+    m_door = new QPushButton("DOOR", this);
+
+    m_boxKey->setFixedSize(150, 150);
+    m_boxPuzzles->setFixedSize(150, 150);
+    m_door->setFixedSize(200, 300);
+    m_door->setStyleSheet("background-color: #8B4513; color: white; font-size: 20px; font-weight: bold;");   // change end
 
     connect(m_boxKey, &QPushButton::clicked, this, &MainWindow::onBoxClicked);
     connect(m_boxPuzzles, &QPushButton::clicked, this, &MainWindow::onBoxClicked);
     connect(m_door, &QPushButton::clicked, this, &MainWindow::onDoorClicked);
+
+    m_boxKey->hide();
+    m_boxPuzzles->hide();
+    m_door->hide();
+
+    m_boxKey->setStyleSheet("background-color: #2196F3; color: white; font-size: 16px;");
+    m_boxPuzzles->setStyleSheet("background-color: #FF9800; color: white; font-size: 16px;");
+    m_door->setStyleSheet("background-color: #8B4513; color: white; font-size: 20px; font-weight: bold;");
+
 }
 
 void MainWindow::setupPuzzleInterface()
@@ -58,6 +83,16 @@ void MainWindow::setupPuzzleInterface()
     m_submitPuzzle = new QPushButton("Submit Answer", this);
 
     connect(m_submitPuzzle, &QPushButton::clicked, this, &MainWindow::onSubmitPuzzle);
+
+
+    m_puzzleLabel->hide();
+    m_puzzleInput->hide();
+    m_submitPuzzle->hide();
+
+    m_puzzleLabel->setStyleSheet("color: white; font-size: 18px;");
+    m_puzzleInput->setStyleSheet("background-color: white; color: black; font-size: 16px; padding: 5px;");
+    m_submitPuzzle->setStyleSheet("background-color: #4CAF50; color: white; font-size: 16px; padding: 5px;");
+
 }
 
 void MainWindow::generatePuzzles(int numPuzzles)
@@ -81,13 +116,46 @@ void MainWindow::generatePuzzles(int numPuzzles)
         {"What invention lets you look right through a wall?", "Window"}
     };
 
-    // Shuffle the puzzles to ensure random order
     std::random_shuffle(m_allPuzzles.begin(), m_allPuzzles.end());
 
-    // Ensure we have the correct number of puzzles
     while (m_allPuzzles.size() > numPuzzles) {
         m_allPuzzles.removeLast();
     }
+}
+
+void MainWindow::startGame()
+{
+    m_startButton->hide();
+    m_exitButton->hide();
+
+    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(centralWidget()->layout());
+    QHBoxLayout *roomLayout = new QHBoxLayout;
+    roomLayout->setAlignment(Qt::AlignCenter);
+    roomLayout->addWidget(m_boxPuzzles);
+    roomLayout->addWidget(m_door);
+    roomLayout->addWidget(m_boxKey);
+
+    mainLayout->addSpacing(20);
+    mainLayout->addLayout(roomLayout);
+    mainLayout->addSpacing(20);
+    mainLayout->addWidget(m_puzzleLabel);
+    mainLayout->addWidget(m_puzzleInput);
+    mainLayout->addWidget(m_submitPuzzle);
+    mainLayout->addSpacing(20);
+    mainLayout->addWidget(m_timeLabel);
+
+    m_boxKey->show();
+    m_boxPuzzles->show();
+    m_door->show();
+
+    m_remainingTime = 5 * 60;
+    m_timer->start(1000);
+    updateTimer();
+}
+
+void MainWindow::exitGame()
+{
+    QApplication::quit();
 }
 
 void MainWindow::onBoxClicked()
@@ -119,7 +187,8 @@ void MainWindow::onBoxClicked()
 void MainWindow::onDoorClicked()
 {
     if (m_hasKey) {
-        QMessageBox::information(this, "Congratulations!", "You escaped the room!");
+        m_timer->stop();
+        QMessageBox::information(this, "Congratulations!", "You escaped the room with " + m_timeLabel->text() + " remaining!");
         QTimer::singleShot(0, this, &QWidget::close);
     } else {
         QMessageBox::information(this, "Door", "The door is locked. You need to find the key!");
@@ -139,7 +208,7 @@ void MainWindow::showPuzzle()
         m_puzzleLabel->hide();
         m_puzzleInput->hide();
         m_submitPuzzle->hide();
-        QMessageBox::information(this, "Puzzles Completed", "You have solved all the riddles. You can now get the key!");
+        QMessageBox::information(this, "Riddles Completed", "You have solved all the riddles. You can now get the key!");
     }
 }
 
@@ -151,7 +220,7 @@ void MainWindow::onSubmitPuzzle()
     if (userAnswer == correctAnswer) {
         m_solvedPuzzles++;
         if (m_solvedPuzzles < 3) {
-            QMessageBox::information(this, "Correct", "That's correct! Here's the next riddles.");
+            QMessageBox::information(this, "Correct", "That's correct! Here's the next riddle.");
         }
         showPuzzle();
     } else {
@@ -159,17 +228,16 @@ void MainWindow::onSubmitPuzzle()
     }
 }
 
-// change start
 void MainWindow::setupTimer()
 {
-    m_remainingTime = 5 * 60; // 5 minutes in seconds
+    m_remainingTime = 5 * 60;
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
     m_timeLabel = new QLabel(this);
     m_timeLabel->setAlignment(Qt::AlignCenter);
     m_timeLabel->setStyleSheet("font-size: 24px; color: white; background-color: black; padding: 10px;");
-    updateTimer(); // Initialize the label text
+    updateTimer();
 }
 
 void MainWindow::updateTimer()
@@ -192,5 +260,3 @@ void MainWindow::gameOver()
     QMessageBox::warning(this, "Game Over", "Time's up! You couldn't escape the room in time.");
     QTimer::singleShot(0, this, &QWidget::close);
 }
-// change end
-
